@@ -44,7 +44,6 @@ $app_name=$CFG->fbkAppNAME;
 $facebook = new Facebook($config);
 $facebook_id= $facebook->getUser();
 
-//busco que cumpla la condición de que este en la lista de testers
 
 require_login(); //Requiere estar log in
 
@@ -61,11 +60,6 @@ $disconnect = optional_param('disconnect', null, PARAM_TEXT);
 
 $PAGE->navbar->add(get_string('facebook', 'local_facebook'));
 echo $OUTPUT->header();
-
-
-if($DB->get_record('facebook_testing',array('username'=>$USER->username))==false){
-print_error("No tienes acceso a este contenido");
-}
 
 //busco si el usuario tiene enlazada la cuenta
 $user_info=$DB->get_record('facebook_user',array('moodleid'=>$USER->id,'status'=>1));
