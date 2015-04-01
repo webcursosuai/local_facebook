@@ -207,7 +207,7 @@ $sql='SELECT posts.id, posts.modified, posts.userid, posts.subject, discussions.
 		INNER JOIN {forum} as forum on (forum.id=discussions.forum)
 		INNER JOIN {course_modules} as cm on (cm.instance=forum.id)
 		WHERE discussions.course = ? AND cm.visible= ? 
-		';
+		GROUP BY posts.id';
 $params = array($courseid,1);
 $data_post=$DB->get_records_sql($sql, $params);
 $data_link=$DB->get_records('url', array('course'=>$courseid));
