@@ -101,7 +101,6 @@ if (isset ( $user_info->status )) {
 		try {
 			$user_profile = $facebook->api ( '' . $facebook_id . '', 'GET' );
 			
-			$username= $user_profile['username'];
 			$link = $user_profile ['link'];
 			$first_name = $user_profile ['first_name'];
 			if (isset ( $user_profile ['middle_name'] )) {
@@ -122,7 +121,7 @@ if (isset ( $user_info->status )) {
 		}
 		
 		$table = table_generator ( 
-				$username, 
+				$facebook_id, 
 				$link, 
 				$first_name, 
 				$middle_name, 
@@ -137,7 +136,7 @@ if (isset ( $user_info->status )) {
 	echo $OUTPUT->heading ( get_string ( 'acountconnect', 'local_facebook' ) );
 	
 	$params = array (
-			'scope' => 'email,publish_actions,user_birthday,user_tagged_places	,user_work_history,user_about_me,user_hometown,
+			'scope' => 'email,publish_actions,user_birthday,user_tagged_places,user_work_history,user_about_me,user_hometown,
 			user_actions.books,user_education_history,user_likes,user_friends,user_religion_politics' 
 	);
 	$loginUrl = $facebook->getLoginUrl ( $params );
@@ -187,7 +186,7 @@ else {
 		// If not, we'll get an exception, which we handle below.
 		try {
 			$user_profile = $facebook->api ( '' . $facebook_id . '', 'GET' );
-			$username = $user_profile['username'];
+			
 			$link = $user_profile ['link'];
 			$first_name = $user_profile ['first_name'];
 			if (isset ( $user_profile ['middle_name'] )) {
@@ -207,7 +206,7 @@ else {
 			error_log ( $e->getMessage () );
 		}
 		
-		$table = table_generator ( $username, $link, $first_name, $middle_name, $last_name, null );
+		$table = table_generator ( $facebook_id, $link, $first_name, $middle_name, $last_name, null );
 		// Look if the account was already linked
 		$duplicate = $DB->get_record ( 'facebook_user', array (
 				'facebookid' => $facebook_id,
@@ -224,8 +223,8 @@ else {
 // if the user has the account linkd it will show his information and some other actions the user can perform.
 
 echo $OUTPUT->footer ();
-function table_generator($username, $link, $first_name, $middle_name, $last_name, $appname) {
-	$img = '<img src="https://graph.facebook.com/' . $username . '/picture?type=large">';
+function table_generator($facebook_id, $link, $first_name, $middle_name, $last_name, $appname) {
+	$img = '<img src="https://graph.facebook.com/' . $facebook_id . '/picture?type=large">';
 	$table2 = new html_table ();
 	$table = new html_table ();
 	$table->data [] = array (
@@ -264,7 +263,7 @@ function table_generator($username, $link, $first_name, $middle_name, $last_name
 		);
 	}
 	$table2->data [] = array (
-			'<img src="https://graph.facebook.com/' .$username . '/picture?type=large">',
+			'<img src="https://graph.facebook.com/' .$facebook_id . '/picture?type=large">',
 			html_writer::table ( $table ) 
 	);
 	echo html_writer::table ( $table2 );
