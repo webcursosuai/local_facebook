@@ -24,7 +24,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-//Pertenece al plugin Facebook
+
 defined('MOODLE_INTERNAL') || die();
 $plugin->pluginname = "local_facebook";
 $plugin->component = 'local_facebook';
