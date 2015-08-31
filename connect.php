@@ -66,7 +66,10 @@ $PAGE->navbar->add(get_string('facebook', 'local_facebook'));
 echo $OUTPUT->header();
 
 //busco si el usuario tiene enlazada la cuenta
-$user_info=$DB->get_record('facebook_user',array('moodleid'=>$USER->id,'status'=>1));
+$user_info=$DB->get_record('facebook_user',array(
+		'moodleid'=>$USER->id,
+		'status'=>1)
+);
 
 $time=time();
 //busco si el usuario ya acepto los permisos
