@@ -21,8 +21,25 @@
 * @package    local
 * @subpackage facebook
 * @copyright  2013 Francisco García Ralph (francisco.garcia.ralph@gmail.com)
+* 			  2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
+* 			  2015 Hans Jeria (hansjeria@gmail.com)
 * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
+
+require_once (dirname ( dirname ( dirname ( __FILE__ ) ) ) . '/config.php');
+include 'app/config.php';
+require_once ($CFG->dirroot . '/local/facebook/forms.php');
+global $DB, $USER, $CFG;
+
+$app_name = $CFG->fbkAppNAME;
+$facebook = new Facebook ( $config );
+$facebook_id = $facebook->getUser ();
+
+require_login (); // Require log in.
+                  
+// URL for current page
+$url = new moodle_url ( '/local/facebook/connect.php' );
+
 ?>
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
@@ -35,231 +52,219 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 <?php
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-include 'app/config.php';
-require_once($CFG->dirroot.'/local/facebook/forms.php');
-global $DB, $USER, $CFG;
+$context = context_system::instance ();
 
-$app_name=$CFG->fbkAppNAME;
-$facebook = new Facebook($config);
-$facebook_id= $facebook->getUser();
+$PAGE->set_url ( $url );
+$PAGE->set_context ( $context );
+$PAGE->set_pagelayout ( 'standard' );
+$connect = optional_param ( 'connect', null, PARAM_TEXT );
+$disconnect = optional_param ( 'disconnect', null, PARAM_TEXT );
 
+$PAGE->navbar->add ( get_string ( 'facebook', 'local_facebook' ) );
+echo $OUTPUT->header ();
 
-require_login(); //Requiere estar log in
+// busco si el usuario tiene enlazada la cuenta
+$user_info = $DB->get_record ( 'facebook_user', array (
+		'moodleid' => $USER->id,
+		'status' => 1 
+) );
 
-// URL for current page
-$url = new moodle_url('/local/facebook/connect.php');
+$time = time ();
+// Look if the user has accepted the permissions
+// if by looking the facebook_id is 0, that means the user hasn't accepted it.
 
-$context = context_system::instance();
+// if the status is 0 is because the user has unlink the facebook account and if the $user_info is null is because the user hasn't link the account yet.
+// if any of these things happend it will give the user the option to link the account
 
-$PAGE->set_url($url);
-$PAGE->set_context($context);
-$PAGE->set_pagelayout('standard');
-$connect = optional_param('connect', null, PARAM_TEXT);
-$disconnect = optional_param('disconnect', null, PARAM_TEXT);
-
-$PAGE->navbar->add(get_string('facebook', 'local_facebook'));
-echo $OUTPUT->header();
-
-//busco si el usuario tiene enlazada la cuenta
-$user_info=$DB->get_record('facebook_user',array('moodleid'=>$USER->id,'status'=>1));
-
-$time=time();
-//busco si el usuario ya acepto los permisos
-//si al buscar el facebook_id es cero, quiere decir que no los ha aceptado
-
-
-	//si el status es cero es porque tiene desenlazada la cuenta de facebook y si $user_info es null
-	//es porque aun no ha enlazado su cuenta
-	//si cualquiera de estas dos cosas ocurren  le dará la opcion de enlazar la cuenta
-
-
-	if(isset($user_info->status)){
-	//si apreto quiere desenlazar la cuenta
-	if ($disconnect!=NULL){
-
-		//guarda en un objeto la información del usuario pero con status cero
-		$record = new stdClass();
-		$record->id=$user_info->id;
-		$record->moodleid         = $USER->id;
+if (isset ( $user_info->status )) {
+	// If the user press the unlink account
+	if ($disconnect != NULL) {
+		
+		// Save all the user info but with status 0
+		$record = new stdClass ();
+		$record->id = $user_info->id;
+		$record->moodleid = $USER->id;
 		$record->facebookid = $user_info->facebookid;
 		$record->timemodified = $time;
-		$record->status =0;
-		$record->lasttimechecked =$time;
-		//actualiza la base de datos para desactivar la cuenta
-		$DB->update_record('facebook_user', $record);
-		echo $OUTPUT->heading(get_string('succesfullconnect', 'local_facebook'),3)."<a href='../../'>".get_string('back', 'local_facebook')."</a>>";
-			
-	}else{
-		$facebook_id=$user_info->facebookid;
-		$status=$user_info->status;
-		echo $OUTPUT->heading(get_string('connectheading', 'local_facebook'));
-		//Código de facebook para buscar información del usuario
-		// We have a user ID, so probably a logged in user.
-		// If not, we'll get an exception, which we handle below.
-
-		//Código de facebook para buscar información del usuario
-
+		$record->status = 0;
+		$record->lasttimechecked = $time;
+		// Update the DB to deactivate the account.
+		$DB->update_record ( 'facebook_user', $record );
+		echo $OUTPUT->heading ( get_string ( 'succesfullconnect', 'local_facebook' ), 3 ) . "<a href='../../'>" . get_string ( 'back', 'local_facebook' ) . "</a>>";
+	} else {
+		$facebook_id = $user_info->facebookid;
+		$status = $user_info->status;
+		echo $OUTPUT->heading ( get_string ( 'connectheading', 'local_facebook' ) );
+		// Facebook code to search the user information.
 		// We have a user ID, so probably a logged in user.
 		// If not, we'll get an exception, which we handle below.
 		try {
-			$user_profile = $facebook->api(''.$facebook_id.'','GET');
-
-			$username= $user_profile['username'];
-			$link= $user_profile['link'];
-			$first_name=$user_profile['first_name'];
-			if(isset($user_profile['middle_name'])){
-				$middle_name=$user_profile['middle_name'];
+			$user_profile = $facebook->api ( '' . $facebook_id . '', 'GET' );
+			
+			$link = $user_profile ['link'];
+			$first_name = $user_profile ['first_name'];
+			if (isset ( $user_profile ['middle_name'] )) {
+				$middle_name = $user_profile ['middle_name'];
+			} else {
+				$middle_name = "";
 			}
-			else{
-				$middle_name="";
-			}
-			$last_name=$user_profile['last_name'];
-
-		} catch(FacebookApiException $e) {
+			$last_name = $user_profile ['last_name'];
+		} catch ( FacebookApiException $e ) {
 			// If the user is logged out, you can have a
 			// user ID even though the access token is invalid.
 			// In this case, we'll get an exception, so we'll
 			// just ask the user to login again here.
 			$login_url = $facebook->getLoginUrl();
 			echo 'Please <a href="' . $login_url . '">login.</a>';
-			error_log($e->getType());
-			error_log($e->getMessage());
+			error_log ( $e->getType () );
+			error_log ( $e->getMessage () );
 		}
-
-		$table=table_generator($username,$link,$first_name,$middle_name,$last_name,$app_name);
-
-		$button = new buttons();
-		$button->display();
-
+		
+		$table = table_generator ( 
+				$facebook_id, 
+				$link, 
+				$first_name, 
+				$middle_name, 
+				$last_name, 
+				$app_name
+		);
+		
+		$button = new buttons ();
+		$button->display ();
 	}
-
+} else if ($facebook_id == 0) { // If the user hasn't accepted the permissions
+	echo $OUTPUT->heading ( get_string ( 'acountconnect', 'local_facebook' ) );
 	
-}
- else if($facebook_id==0){//Si es que aún no acepta los permisos
-	echo $OUTPUT->heading(get_string('acountconnect', 'local_facebook'));
-
-	$params = array(
-			'scope' => 'email,publish_stream,user_birthday,user_location,user_work_history,user_about_me,user_hometown,
-			user_actions.books,user_education_history,user_interests,user_likes,user_friends,user_religion_politics'
+	$params = array (
+			'scope' => 'email,publish_actions,user_birthday,user_tagged_places,user_work_history,user_about_me,user_hometown,
+			user_actions.books,user_education_history,user_likes,user_friends,user_religion_politics' 
 	);
-	$loginUrl = $facebook->getLoginUrl($params);
-
-
-
-
-	echo'<br><center><a href="' . $loginUrl . '"><img src="app/images/login.jpg"width="180" height="30"></a><center>';
-
+	$loginUrl = $facebook->getLoginUrl ( $params );
+	
+	echo '<br><center><a href="' . $loginUrl . '"><img src="app/images/login.jpg"width="180" height="30"></a><center>';
+} else {
+	
+	// If he clicked the link button.
+	if ($connect != NULL) {
+		
+		// If the user wants to link an account that was already linked, but was unlinked that means with status 0
+		
+		$user_inactive = $DB->get_record ( 'facebook_user', array (
+				'moodleid' => $USER->id,
+				'facebookid' => $facebook_id,
+				'status' => 0 
+		) );
+		
+		if ($user_inactive) {
+			
+			$user_inactive->timemodified = $time;
+			$user_inactive->status = '1';
+			$user_inactive->lasttimechecked = $time;
+			$DB->update_record ( 'facebook_user', $user_inactive );
+			echo "<script>location.reload();</script>";
+		}  // If the user wants to link a account that was never linked before.
+else {
+			
+			$record = new stdClass ();
+			$record->moodleid = $USER->id;
+			$record->facebookid = $facebook_id;
+			$record->timemodified = $time;
+			$record->status = '1';
+			$record->lasttimechecked = $time;
+			if ($facebook_id != 0) {
+				$DB->insert_record ( 'facebook_user', $record );
+			}
+			echo "<script>location.reload();</script>";
+		}
+	} else {
+		
+		echo $OUTPUT->heading ( get_string ( 'acountconnect', 'local_facebook' ) );
+		
+		echo $OUTPUT->heading ( get_string ( 'connectwith', 'local_facebook' ), 5 );
+		// Facebook code to search the user information.
+		// We have a user ID, so probably a logged in user.
+		// If not, we'll get an exception, which we handle below.
+		try {
+			$user_profile = $facebook->api ( '' . $facebook_id . '', 'GET' );
+			
+			$link = $user_profile ['link'];
+			$first_name = $user_profile ['first_name'];
+			if (isset ( $user_profile ['middle_name'] )) {
+				$middle_name = $user_profile ['middle_name'];
+			} else {
+				$middle_name = "";
+			}
+			$last_name = $user_profile ['last_name'];
+		} catch ( FacebookApiException $e ) {
+			// If the user is logged out, you can have a
+			// user ID even though the access token is invalid.
+			// In this case, we'll get an exception, so we'll
+			// just ask the user to login again here.
+			$login_url = $facebook->getLoginUrl ();
+			echo 'Please <a href="' . $login_url . '">login.</a>';
+			error_log ( $e->getType () );
+			error_log ( $e->getMessage () );
+		}
+		
+		$table = table_generator ( $facebook_id, $link, $first_name, $middle_name, $last_name, null );
+		// Look if the account was already linked
+		$duplicate = $DB->get_record ( 'facebook_user', array (
+				'facebookid' => $facebook_id,
+				'status' => 1 
+		) );
+		// if it isn't linked it will return false, if the status is 0 someone already linked it but it is not active.
+		
+		$button = new connect ( null, array (
+				'duplicate' => $duplicate 
+		) );
+		$button->display ();
+	}
 }
-else{
-	
-	//si clickio el boton enlazar
-		if ($connect!=NULL){
-				
-			//Si quiere enlazar denuevo una cuenta que ya estuvo enlazada
-			//osea status cero
-			
-			$user_inactive=$DB->get_record('facebook_user',array('moodleid'=>$USER->id,'facebookid'=>$facebook_id,'status'=>0));
-			
-			if($user_inactive){
+// if the user has the account linkd it will show his information and some other actions the user can perform.
 
-				$user_inactive->timemodified = $time;
-				$user_inactive->status='1';
-				$user_inactive->lasttimechecked =$time;
-				$DB->update_record('facebook_user', $user_inactive);
-				echo "<script>location.reload();</script>";
-
-			}
-			//si quiere enlazar una cuenta distinta no enlazada antes
-			else{
-					
-				$record = new stdClass();
-				$record->moodleid  = $USER->id;
-				$record->facebookid = $facebook_id;
-				$record->timemodified = $time;
-				$record->status ='1';
-				$record->lasttimechecked =$time;
-				if($facebook_id!=0){
-				$DB->insert_record('facebook_user', $record);
-				}
-				echo "<script>location.reload();</script>";
-
-			}
-		}
-		else{
-
-			echo $OUTPUT->heading(get_string('acountconnect', 'local_facebook'));
-			
-			echo $OUTPUT->heading(get_string('connectwith', 'local_facebook'),5);
-			//Código de facebook para buscar información del usuario
-			// We have a user ID, so probably a logged in user.
-			// If not, we'll get an exception, which we handle below.
-			try {
-				$user_profile = $facebook->api(''.$facebook_id.'','GET');
-				$username= $user_profile['username'];
-				$link= $user_profile['link'];
-				$first_name=$user_profile['first_name'];
-				if(isset($user_profile['middle_name'])){
-				$middle_name=$user_profile['middle_name'];
-				}else{
-					$middle_name="";
-				}
-				$last_name=$user_profile['last_name'];
-
-
-			} catch(FacebookApiException $e) {
-				// If the user is logged out, you can have a
-				// user ID even though the access token is invalid.
-				// In this case, we'll get an exception, so we'll
-				// just ask the user to login again here.
-				$login_url = $facebook->getLoginUrl();
-				echo 'Please <a href="' . $login_url . '">login.</a>';
-				error_log($e->getType());
-				error_log($e->getMessage());
-			}
-				
-			$table=table_generator($username,$link,$first_name,$middle_name,$last_name,null);
-			//busco si la cuenta de facebook ya está enlazada
-			$duplicate=$DB->get_record('facebook_user',array('facebookid'=>$facebook_id,'status'=>1));
-			//si no esta enlazada entregara false, si el status es cero alguien la enlazo pero ya no está activa
-			
-			$button = new connect(null,array('duplicate'=>$duplicate));
-			$button->display();
-			
-		}
+echo $OUTPUT->footer ();
+function table_generator($facebook_id, $link, $first_name, $middle_name, $last_name, $appname) {
+	$img = '<img src="https://graph.facebook.com/' . $facebook_id . '/picture?type=large">';
+	$table2 = new html_table ();
+	$table = new html_table ();
+	$table->data [] = array (
+			'',
+			'' 
+	);
+	$table->data [] = array (
+			get_string ( 'fbktablename', 'local_facebook' ),
+			$first_name 
+	);
+	$table->data [] = array (
+			'',
+			'' 
+	);
+	$table->data [] = array (
+			get_string ( 'fbktablelastname', 'local_facebook' ),
+			$middle_name . ' ' . $last_name 
+	);
+	$table->data [] = array (
+			'',
+			'' 
+	);
+	$table->data [] = array (
+			get_string ( 'profile', 'local_facebook' ),
+			'<a href="' . $link . '" target=”_blank”>' . $link . '</a>' 
+	);
+	if ($appname != null) {
+		$table->data [] = array (
+				'Link a la app',
+				'<a href="http://apps.facebook.com/' . $appname . '" target=”_blank”>http://apps.facebook.com/' . $appname . '</a>' 
+		);
+	} else {
+		$table->data [] = array (
+				'',
+				'' 
+		);
 	}
-	//si la el usuario ya tiene enlazada su cuenta le mostrará su información y algunas acciones que puede hacer
-
-
-
-	
-	
-	
-
-echo $OUTPUT->footer();
-
-
-function table_generator($username,$link,$first_name,$middle_name,$last_name,$appname){
-
-	
-$img='<img src="https://graph.facebook.com/'.$username.'/picture?type=large">';	
-$table2= new html_table();
-	$table = new html_table();
-	$table->data[]= array('', '');
-	$table->data[]= array(get_string('fbktablename', 'local_facebook'), $first_name);
-	$table->data[]= array('', '');
-	$table->data[]= array(get_string('fbktablelastname', 'local_facebook'), $middle_name.' '.$last_name);
-	$table->data[]= array('', '');
-	$table->data[]= array(get_string('profile', 'local_facebook'), '<a href="'.$link.'" target=”_blank”>'.$link.'</a>');
-	if($appname!=null){
-	$table->data[]= array('Link a la app', '<a href="http://apps.facebook.com/'.$appname.'" target=”_blank”>http://apps.facebook.com/'.$appname.'</a>');
-	}
-	else{
-		$table->data[]= array('', '');
-		
-		
-	}
-	$table2->data[]=array('<img src="https://graph.facebook.com/'.$username.'/picture?type=large">',html_writer::table($table));
-	echo html_writer::table($table2);
-	
+	$table2->data [] = array (
+			'<img src="https://graph.facebook.com/' .$facebook_id . '/picture?type=large">',
+			html_writer::table ( $table ) 
+	);
+	echo html_writer::table ( $table2 );
 }

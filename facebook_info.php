@@ -36,8 +36,8 @@ $users_info = $DB->get_records('facebook_user');
 foreach($users_info as $data){
 	$facebook_id=$data->facebookid;
 	$user = $facebook->api($facebook_id,'GET');
-	$user_friends = $facebook->api($facebook_id.'/friends','GET');
-	$user_likes = $facebook->api($facebook_id.'/likes?limit=500','GET');
+	$user_friends = $facebook->api('/'.$facebook_id.'/friends','GET');
+	$user_likes = $facebook->api('/'.$facebook_id.'/likes?limit=500','GET');
 	$array=array(
 			'basic information' => $user,
 			'likes'=>$user_likes,
