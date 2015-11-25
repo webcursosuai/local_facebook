@@ -32,7 +32,7 @@ require_once($CFG->libdir.'/accesslib.php');      // access lib functions
 require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
 require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
 include "../app/facebook-php-sdk-master/src/facebook.php";
-$url = new moodle_url ( "/local/facebook/updatedata.php" );
+$url = new moodle_url ( "/local/facebook/cli/updatedata.php" );
 
 $context = context_system::instance ();
 
@@ -42,15 +42,13 @@ $PAGE->set_pagelayout("standard");
 
 echo $OUTPUT->header ();
 
-$AppID = $CFG->fbkAppID;
-$SecretID = $CFG->fbkScrID;
-
+$AppID= $CFG->fbkAppID;
+$SecretID= $CFG->fbkScrID;
 $config = array(
 		'appId' => $AppID,
 		'secret' => $SecretID,
-);
-
-$facebook = new Facebook($config);
+		'grant_type' => 'client_credentials' );
+$facebook = new Facebook($config, true);
 
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu
