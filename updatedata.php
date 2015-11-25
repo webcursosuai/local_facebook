@@ -25,7 +25,7 @@
 */
 
 require_once(dirname(dirname(dirname( __FILE__ )))."/config.php");
-require_once($CFG->dirroot."/local/facebook/app/facebook-php-sdk-master/src/facebook.php");
+include "app/facebook-php-sdk-master/src/facebook.php";
 global $DB, $CFG;
 
 require_login ();
@@ -49,10 +49,10 @@ $SecretID = $CFG->fbkScrID;
 $config = array(
 		'appId' => $AppID,
 		'secret' => $SecretID,
-		
+		'grant_type' => 'client_credentials'
 );
 
-$facebook = new Facebook($config);	
+$facebook = new Facebook($config,true);	
 
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu 
