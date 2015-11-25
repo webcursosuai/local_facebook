@@ -44,6 +44,8 @@ $PAGE->set_pagelayout("standard");
 
 echo $OUTPUT->header ();
 
+$facebook = new Facebook($config);
+
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu 
 		WHERE fu.status = ? ";
