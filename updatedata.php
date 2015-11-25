@@ -25,7 +25,7 @@
 */
 
 require_once (dirname ( dirname ( dirname ( __FILE__ ) ) ) . "/config.php");
-include_once ($CFG->dirrrot."/local/facebook/app/facebook-php-sdk-master/src/facebook.php");
+include "app/facebook-php-sdk-master/src/facebook.php";
 global $DB, $CFG;
 
 require_login ();
@@ -44,9 +44,7 @@ $PAGE->set_pagelayout("standard");
 echo $OUTPUT->header ();
 
 $AppID = $CFG->fbkAppID;
-echo "appid ".$AppID."<br>";
 $SecretID = $CFG->fbkScrID;
-echo "secretid ".$SecretID."<br>";
 
 $config = array(
 		'appId' => $AppID,
