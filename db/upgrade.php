@@ -142,5 +142,69 @@
    	upgrade_plugin_savepoint(true, 2013301001, 'local', 'facebook');
    }
    
+   if ($oldversion < 2015102501) {
+   
+   	// Define field link to be added to facebook_user.
+   	$table = new xmldb_table('facebook_user');
+   	$field = new xmldb_field('link', XMLDB_TYPE_CHAR, '200', null, null, null, 'NULL', 'lasttimechecked');
+   
+   	// Conditionally launch add field link.
+   	if (!$dbman->field_exists($table, $field)) {
+   		$dbman->add_field($table, $field);
+   	}
+   	
+   
+   	// Facebook savepoint reached.
+   	upgrade_plugin_savepoint(true, 2015102501, 'local', 'facebook');
+   }
+   
+   if ($oldversion < 2015102502) {
+   
+   	// Define field firstname to be added to facebook_user.
+   	$table = new xmldb_table('facebook_user');
+   	$field = new xmldb_field('firstname', XMLDB_TYPE_CHAR, '200', null, null, null, 'NULL', 'link');
+   
+   	// Conditionally launch add field firstname.
+   	if (!$dbman->field_exists($table, $field)) {
+   		$dbman->add_field($table, $field);
+   	}
+   
+   	// Facebook savepoint reached.
+   	upgrade_plugin_savepoint(true, 2015102502, 'local', 'facebook');
+   }
+    
+   if ($oldversion < 2015102503) {
+   
+   	// Define field middlename to be added to facebook_user.
+   	$table = new xmldb_table('facebook_user');
+   	$field = new xmldb_field('middlename', XMLDB_TYPE_CHAR, '200', null, null, null, 'NULL', 'firstname');
+   
+   	// Conditionally launch add field middlename.
+   	if (!$dbman->field_exists($table, $field)) {
+   		$dbman->add_field($table, $field);
+   	}
+   
+   	// Facebook savepoint reached.
+   	upgrade_plugin_savepoint(true, 2015102503, 'local', 'facebook');
+   }
+    
+   if ($oldversion < 2015102504) {
+   
+   	// Define field lastname to be added to facebook_user.
+   	$table = new xmldb_table('facebook_user');
+   	$field = new xmldb_field('lastname', XMLDB_TYPE_CHAR, '200', null, null, null, 'NULL', 'middlename');
+   
+   	// Conditionally launch add field lastname.
+   	if (!$dbman->field_exists($table, $field)) {
+   		$dbman->add_field($table, $field);
+   	}
+   
+   	// Facebook savepoint reached.
+   	upgrade_plugin_savepoint(true, 2015102504, 'local', 'facebook');
+   }
+    
+    
+   
+   
    return true;
    }
