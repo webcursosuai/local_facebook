@@ -48,10 +48,10 @@ $SecretID = $CFG->fbkScrID;
 $config = array(
 		'appId' => $AppID,
 		'secret' => $SecretID,
-		'grant_type' => 'client_credentials' 
+		
 );
 
-$facebook = new facebook($config);
+$facebook = new facebook($config);	
 
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu 
