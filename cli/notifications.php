@@ -185,13 +185,6 @@ foreach($arrayfacebookid as $userfacebookid){
 		;
 	}
 }
-echo "ok\n";
-echo $counttosend." notificantions sent.\n";
-echo "Ending at ".date("F j, Y, G:i:s");
-$timenow=time();
-$execute=$time - $timenow;
-echo "\nExecute time ".$execute." sec";
-echo "\n";
 
 
 $sqlgetusers = "SELECT *
@@ -243,5 +236,12 @@ echo "La cantidad de usuarios actulizados es :".$countusersupdate."<br>";
 
 echo html_writer::table($table);
 
+echo "ok\n";
+echo $counttosend." notificantions sent.\n";
+echo "Ending at ".date("F j, Y, G:i:s");
+$timenow=time();
+$execute=$time - $timenow;
+echo "\nExecute time ".$execute." sec";
+echo "\n";
 
 exit(0); // 0 means success
