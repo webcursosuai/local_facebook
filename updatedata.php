@@ -46,9 +46,9 @@ echo $OUTPUT->header ();
 
 $sqlgetusers = "SELECT u.email, fu.moodleid, fu.facebookid, fu.status
 		FROM {facebook_user} AS fu JOIN {users} AS u
-		WHERE fu.status = ? AND fu.link == ?
-		AND fu.firstname == ? AND fu.middlename == ? 
-		AND fu.lastname == ?";
+		WHERE fu.status = ? AND fu.link = ?
+		AND fu.firstname = ? AND fu.middlename = ? 
+		AND fu.lastname = ?";
 
 // Users linked with facebook
 $users = $DB->get_records_sql($sqlgetusers, array(
