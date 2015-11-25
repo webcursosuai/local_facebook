@@ -44,14 +44,17 @@ $PAGE->set_pagelayout("standard");
 echo $OUTPUT->header ();
 
 $AppID = $CFG->fbkAppID;
+echo "appid ".$AppID."<br>";
 $SecretID = $CFG->fbkScrID;
+echo "secretid ".$SecretID."<br>";
+
 $config = array(
 		'appId' => $AppID,
 		'secret' => $SecretID,
 		
 );
 
-$facebook = new facebook($config);	
+$facebook = new Facebook($config);	
 
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu 
