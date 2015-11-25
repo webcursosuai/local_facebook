@@ -71,8 +71,7 @@ foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
 	
 	$newinfo = new stdClass();
-	$newinfo->moodleid = $user->moodleid;
-	$newinfo->facebookid = $user->facebookid;
+	$newinfo->id = $user->id;
 	
 	$newinfo->link = $userprofile['link'];
 	$newinfo->firstname = $userprofile['first_name'];
