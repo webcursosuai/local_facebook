@@ -44,26 +44,21 @@ $PAGE->set_pagelayout("standard");
 
 echo $OUTPUT->header ();
 
-$sqlgetusers = "SELECT u.email, fu.moodleid, fu.facebookid, fu.status
-		FROM {facebook_user} AS fu JOIN {user} AS u
-		WHERE fu.status = ? AND fu.link = ?
-		AND fu.firstname = ? AND fu.middlename = ? 
-		AND fu.lastname = ?";
+$sqlgetusers = "SELECT *
+		FROM {facebook_user} AS fu 
+		WHERE fu.status = ? ";
 
 // Users linked with facebook
 $users = $DB->get_records_sql($sqlgetusers, array(
-		1,
-		NULL,
-		NULL,
-		NULL,
-		NULL
+		1
 ));
 
 $countusers = count($users);
+echo "La cantidad de usuarios para actualizar información son: ".$countusers."<br>";
 $countusersupdate = 0;
 
 $table = new html_table();
-$table->head = array("Nombre usuario", "Facebook ID", "Email", "Actualizado");
+$table->head = array("Nombre usuario", "Facebook ID", "Actualizado");
 
 foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
@@ -92,12 +87,12 @@ foreach($users as $user){
 	$table->data[] = array(
 			$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname,
 			$user->facebookid,
-			$user->email,
-			$status
-			
+			$status		
 	);
 	
 }
+
+echo "La cantidad de usuarios actulizados es :".$countusersupdate."<br>";
 
 echo html_writer::table($table);	
 
