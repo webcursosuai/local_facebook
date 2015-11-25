@@ -64,6 +64,14 @@ cli_heading('Facebook notifications'); // TODO: localize
 echo "\nSearching for new notifications\n";
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";*/
 
+$context = context_system::instance ();
+$url = new moodle_url ( '/local/facebook/cli/notifications.php' );
+$PAGE->set_url ( $url );
+$PAGE->set_context ( $context );
+$PAGE->set_pagelayout ( 'standard' );
+
+echo $OUTPUT->header ();
+
 // define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
 define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
@@ -245,3 +253,4 @@ echo "\nExecute time ".$execute." sec";
 echo "\n";
 
 exit(0); // 0 means success
+echo $OUTPUT->footer ();
