@@ -25,9 +25,7 @@
 */
 
 require_once (dirname ( dirname ( dirname ( __FILE__ ) ) ) . "/config.php");
-include "app/config.php";
-require_once ($CFG->dirroot . "/local/facebook/forms.php");
-global $DB, $USER, $CFG;
+global $DB, $CFG;
 
 require_login ();
 if(!is_siteadmin($USER)){
@@ -44,16 +42,22 @@ $PAGE->set_pagelayout("standard");
 
 echo $OUTPUT->header ();
 
-$facebook = new Facebook($config);
+$AppID = $CFG->fbkAppID;
+$SecretID = $CFG->fbkScrID;
+$config = array(
+		'appId' => $AppID,
+		'secret' => $SecretID,
+		'grant_type' => 'client_credentials' 
+);
+
+$facebook = new facebook($config);
 
 $sqlgetusers = "SELECT *
 		FROM {facebook_user} AS fu 
 		WHERE fu.status = ? ";
 
 // Users linked with facebook
-$users = $DB->get_records_sql($sqlgetusers, array(
-		1
-));
+$users = $DB->get_records_sql($sqlgetusers, array(1));
 
 $countusers = count($users);
 echo "La cantidad de usuarios para actualizar información son: ".$countusers."<br>";
