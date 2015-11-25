@@ -25,8 +25,13 @@
 */
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
+require_once($CFG->libdir.'/clilib.php');      // cli only functions
+require_once($CFG->libdir.'/moodlelib.php');      // moodle lib functions
+require_once($CFG->libdir.'/datalib.php');      // data lib functions
+require_once($CFG->libdir.'/accesslib.php');      // access lib functions
+require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
+require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
 include "../app/facebook-php-sdk-master/src/facebook.php";
-
 $url = new moodle_url ( "/local/facebook/updatedata.php" );
 
 $context = context_system::instance ();
