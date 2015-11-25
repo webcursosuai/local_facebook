@@ -25,7 +25,7 @@
 */
 
 require_once (dirname ( dirname ( dirname ( __FILE__ ) ) ) . "/config.php");
-include_once ($CFG->dirrot."/local/facebook/app/facebook-php-sdk-master/src/facebook.php");
+include_once ($CFG->dirrrot."/local/facebook/app/facebook-php-sdk-master/src/facebook.php");
 global $DB, $CFG;
 
 require_login ();
