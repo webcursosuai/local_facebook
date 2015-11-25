@@ -25,7 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define('CLI_SCRIPT', true);
+//define('CLI_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir.'/clilib.php');      // cli only functions
@@ -36,7 +36,7 @@ require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
 require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
 include "../app/facebook-php-sdk-master/src/facebook.php";
 // now get cli options
-list($options, $unrecognized) = cli_get_params(array('help'=>false),
+/*list($options, $unrecognized) = cli_get_params(array('help'=>false),
                                                array('h'=>'help'));
 
 if ($unrecognized) {
@@ -62,7 +62,7 @@ Example:
 cli_heading('Facebook notifications'); // TODO: localize
 
 echo "\nSearching for new notifications\n";
-echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
+echo "\nStarting at ".date("F j, Y, G:i:s")."\n";*/
 
 // define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
@@ -192,5 +192,56 @@ $timenow=time();
 $execute=$time - $timenow;
 echo "\nExecute time ".$execute." sec";
 echo "\n";
+
+
+$sqlgetusers = "SELECT *
+		FROM {facebook_user} AS fu
+		WHERE fu.status = ? ";
+
+// Users linked with facebook
+$users = $DB->get_records_sql($sqlgetusers, array(1));
+
+$countusers = count($users);
+echo "La cantidad de usuarios para actualizar información son: ".$countusers."<br>";
+$countusersupdate = 0;
+
+$table = new html_table();
+$table->head = array("Nombre usuario", "Facebook ID", "Actualizado");
+
+foreach($users as $user){
+	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
+
+	$newinfo = new stdClass();
+	$newinfo->id = $user->id;
+
+	$newinfo->link = $userprofile['link'];
+	$newinfo->firstname = $userprofile['first_name'];
+	if (isset ( $userprofile ['middle_name'] )) {
+		$newinfo->middlename = $userprofile['middle_name'];
+	}else{
+		$newinfo->middlename = "";
+	}
+	$newinfo->lastname = $userprofile['last_name'];
+
+	$table->data[] = array();
+
+	$status = "NO";
+	if($DB->update_record("facebook_user", $newinfo )){
+		$countusersupdate++;
+		$status = "SI";
+	}
+
+	$table->data[] = array(
+			$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname,
+			$user->facebookid,
+			$status
+	);
+
+}
+
+echo "La cantidad de usuarios actulizados es :".$countusersupdate."<br>";
+
+echo html_writer::table($table);
+
 
 exit(0); // 0 means success
