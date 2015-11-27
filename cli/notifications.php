@@ -62,15 +62,7 @@ Example:
 cli_heading('Facebook notifications'); // TODO: localize
 
 echo "\nSearching for new notifications\n";
-echo "\nStarting at ".date("F j, Y, G:i:s")."\n";*/
-
-$context = context_system::instance ();
-$url = new moodle_url ( '/local/facebook/cli/notifications.php' );
-$PAGE->set_url ( $url );
-$PAGE->set_context ( $context );
-$PAGE->set_pagelayout ( 'standard' );
-
-echo $OUTPUT->header ();
+echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
 // define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
@@ -137,9 +129,14 @@ $updatequery = "UPDATE {facebook_notifications}
 		SET status=?, timemodified=?
 		WHERE status = ? AND time >= ?";
 
-$DB->execute($updatequery, $paramsupdate);
+$DB->execute($updatequery, $paramsupdate);*/
+
+// Users linked with facebook
+$users = $DB->get_records_sql($sqlgetusers, array(1));
+
+$countusers = count($users);
 	
-echo $countnotifications." Notifications found\n";
+echo $countusers." Updates found\n";
 echo "ok\n";
 echo "Sending notifications ".date("F j, Y, G:i:s")."\n";
 
@@ -151,7 +148,7 @@ $config = array(
 		'secret' => $SecretID,
 		'grant_type' => 'client_credentials' );
 $facebook = new Facebook($config, true);
-
+/*
 $counttosend = 0;
 $token = $CFG->fbkTkn;
 $courseidarray = array();
@@ -194,20 +191,9 @@ foreach($arrayfacebookid as $userfacebookid){
 	}
 }
 
+*/
 
-$sqlgetusers = "SELECT *
-		FROM {facebook_user} AS fu
-		WHERE fu.status = ? ";
-
-// Users linked with facebook
-$users = $DB->get_records_sql($sqlgetusers, array(1));
-
-$countusers = count($users);
-echo "La cantidad de usuarios para actualizar información son: ".$countusers."<br>";
 $countusersupdate = 0;
-
-$table = new html_table();
-$table->head = array("Nombre usuario", "Facebook ID", "Actualizado");
 
 foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
@@ -224,28 +210,21 @@ foreach($users as $user){
 	}
 	$newinfo->lastname = $userprofile['last_name'];
 
-	$table->data[] = array();
-
 	$status = "NO";
 	if($DB->update_record("facebook_user", $newinfo )){
 		$countusersupdate++;
 		$status = "SI";
+		echo $countusersupdate." Nombre ".$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname.
+			"Facebook id ".$userfacebookid->facebookid." ok\n";
 	}
 
-	$table->data[] = array(
-			$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname,
-			$user->facebookid,
-			$status
-	);
+
 
 }
 
-echo "La cantidad de usuarios actulizados es :".$countusersupdate."<br>";
-
-echo html_writer::table($table);
 
 echo "ok\n";
-echo $counttosend." notificantions sent.\n";
+echo $countusersupdate." Update hechos sent.\n";
 echo "Ending at ".date("F j, Y, G:i:s");
 $timenow=time();
 $execute=$time - $timenow;
