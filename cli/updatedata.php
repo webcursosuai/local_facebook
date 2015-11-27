@@ -60,7 +60,6 @@ $countusersupdate = 0;
 
 foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
-	var_dump($userprofile);
 
 	$newinfo = new stdClass();
 	$newinfo->id = $user->id;
