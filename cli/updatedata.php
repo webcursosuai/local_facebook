@@ -24,56 +24,46 @@
 * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
-require_once(dirname(dirname(dirname( __FILE__ )))."/config.php");
-include "app/facebook-php-sdk-master/src/facebook.php";
-global $DB, $CFG;
+require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
+require_once($CFG->libdir.'/clilib.php');      // cli only functions
+require_once($CFG->libdir.'/moodlelib.php');      // moodle lib functions
+require_once($CFG->libdir.'/datalib.php');      // data lib functions
+require_once($CFG->libdir.'/accesslib.php');      // access lib functions
+require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
+require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
+include "../app/facebook-php-sdk-master/src/facebook.php";
 
-require_login ();
-if(!is_siteadmin($USER)){
-	die();
-}
-
-$url = new moodle_url ( "/local/facebook/updatedata.php" );
-
-$context = context_system::instance ();
-
-$PAGE->set_url($url);
-$PAGE->set_context($context);
-$PAGE->set_pagelayout("standard");
-
-echo $OUTPUT->header ();
-
-$AppID = $CFG->fbkAppID;
-$SecretID = $CFG->fbkScrID;
-
-$config = array(
-		'appId' => $AppID,
-		'secret' => $SecretID,
-		'grant_type' => 'client_credentials'
-);
-
-$facebook = new Facebook($config,true);	
+$time = time();
 
 $sqlgetusers = "SELECT *
-		FROM {facebook_user} AS fu 
+		FROM {facebook_user} AS fu
 		WHERE fu.status = ? ";
 
-// Users linked with facebook
 $users = $DB->get_records_sql($sqlgetusers, array(1));
 
 $countusers = count($users);
-echo "La cantidad de usuarios para actualizar información son: ".$countusers."<br>";
-$countusersupdate = 0;
 
-$table = new html_table();
-$table->head = array("Nombre usuario", "Facebook ID", "Actualizado");
+echo $countusers." Updates found\n";
+echo "ok\n";
+echo "Updating ".date("F j, Y, G:i:s")."\n";
+
+
+$AppID= $CFG->fbkAppID;
+$SecretID= $CFG->fbkScrID;
+$config = array(
+		'appId' => $AppID,
+		'secret' => $SecretID,
+		'grant_type' => 'client_credentials' );
+$facebook = new Facebook($config, true);
+
+$countusersupdate = 0;
 
 foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
-	
+
 	$newinfo = new stdClass();
 	$newinfo->id = $user->id;
-	
+
 	$newinfo->link = $userprofile['link'];
 	$newinfo->firstname = $userprofile['first_name'];
 	if (isset ( $userprofile ['middle_name'] )) {
@@ -82,26 +72,22 @@ foreach($users as $user){
 		$newinfo->middlename = "";
 	}
 	$newinfo->lastname = $userprofile['last_name'];
-	
-	$table->data[] = array();
-	
-	$status = "NO";
+
 	if($DB->update_record("facebook_user", $newinfo )){
 		$countusersupdate++;
-		$status = "SI";
+		echo $countusersupdate."; ".$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname.
+		"; Facebook id ".$user->facebookid.";\n";
 	}
-	
-	$table->data[] = array(
-			$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname,
-			$user->facebookid,
-			$status		
-	);
-	
 }
 
-echo "La cantidad de usuarios actulizados es :".$countusersupdate."<br>";
 
-echo html_writer::table($table);	
+echo "ok\n";
+echo $countusersupdate." Update hechos sent.\n";
+echo "Ending at ".date("F j, Y, G:i:s");
+$timenow=time();
+$execute=$time - $timenow;
+echo "\nExecute time ".$execute." sec";
+echo "\n";
 
+exit(0); // 0 means success
 echo $OUTPUT->footer ();
-
