@@ -72,8 +72,12 @@ foreach($users as $user){
 		$newinfo->middlename = "";
 	}
 	$newinfo->lastname = $userprofile['last_name'];
-	$newinfo->email = $userprofile['email'];
-
+	if(isset($userprofile['email'])){
+		$newinfo->email = $userprofile['email'];
+	}else{
+		$newinfo->email = "NO PERMISSIONS";
+	}
+	
 	if($DB->update_record("facebook_user", $newinfo )){
 		$countusersupdate++;
 		echo $countusersupdate."; ".$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname.
