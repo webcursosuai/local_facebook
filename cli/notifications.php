@@ -114,9 +114,9 @@ if(count($allnotifications)>0){
 		$DB->insert_records('facebook_notifications', $allnotifications);
 }
 
-$countnotifications = count($allnotifications);
+$countnotifications = count($allnotifications);*/
 $time = time();
-
+/*
 //query that updates the status of the user last login
 $paramsupdate = array(
 			1,
@@ -132,6 +132,11 @@ $updatequery = "UPDATE {facebook_notifications}
 $DB->execute($updatequery, $paramsupdate);*/
 
 // Users linked with facebook
+
+$sqlgetusers = "SELECT *
+		FROM {facebook_user} AS fu
+		WHERE fu.status = ? ";
+
 $users = $DB->get_records_sql($sqlgetusers, array(1));
 
 $countusers = count($users);
@@ -215,7 +220,7 @@ foreach($users as $user){
 		$countusersupdate++;
 		$status = "SI";
 		echo $countusersupdate." Nombre ".$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname.
-			"Facebook id ".$userfacebookid->facebookid." ok\n";
+			"Facebook id ".$user->facebookid." ok\n";
 	}
 
 
