@@ -203,6 +203,20 @@
    	upgrade_plugin_savepoint(true, 2015102504, 'local', 'facebook');
    }
     
+   if ($oldversion < 2015102701) {
+   
+   	// Define field email to be added to facebook_user.
+   	$table = new xmldb_table('facebook_user');
+   	$field = new xmldb_field('email', XMLDB_TYPE_CHAR, '100', null, null, null, 'NULL', 'lastname');
+   
+   	// Conditionally launch add field email.
+   	if (!$dbman->field_exists($table, $field)) {
+   		$dbman->add_field($table, $field);
+   	}
+   
+   	// Facebook savepoint reached.
+   	upgrade_plugin_savepoint(true, 2015102701, 'local', 'facebook');
+   }
     
    
    

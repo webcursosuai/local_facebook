@@ -60,6 +60,7 @@ $countusersupdate = 0;
 
 foreach($users as $user){
 	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
+	var_dump($userprofile);
 
 	$newinfo = new stdClass();
 	$newinfo->id = $user->id;
@@ -72,6 +73,7 @@ foreach($users as $user){
 		$newinfo->middlename = "";
 	}
 	$newinfo->lastname = $userprofile['last_name'];
+	$newinfo->email = $userprofile['email'];
 
 	if($DB->update_record("facebook_user", $newinfo )){
 		$countusersupdate++;

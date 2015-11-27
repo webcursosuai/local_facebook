@@ -63,19 +63,17 @@ cli_heading('Facebook notifications'); // TODO: localize
 
 echo "\nSearching for new notifications\n";
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
-
+*/
 // define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
 define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
 
 // sql that brings the latest time modified from facebook_notifications
-$maxtimenotificationssql = "SELECT max(timemodified) AS maxtime
-		            FROM {facebook_notifications}
-			    WHERE status = ?";
+$maxtimenotificationssql = "SELECT max(timemodified) AS maxtime	
+		FROM {facebook_notifications}
+		WHERE status = ?";
 
-$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(
-		1
-));
+$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(1));
 
 // if clause that makes the timemodified=0 if there are no records in the data base
 if($maxtimenotifications->maxtime == null){
@@ -83,6 +81,7 @@ if($maxtimenotifications->maxtime == null){
 }else{
 	$timemodified = $maxtimenotifications->maxtime;
 }
+
 // sql that gets all the courses with a resource to notify
 $paramsresources = array(
 		'resource',
@@ -90,6 +89,7 @@ $paramsresources = array(
 		1,
 		$timemodified
 );
+//TODO: agregar foros, revisar fecha que incluir mas notificaciones.
 $sqlresource = "SELECT r.course
 		FROM {course_modules} AS cm INNER JOIN {modules} AS m ON (cm.module = m.id)
     	INNER JOIN {resource} AS r ON (r.course = cm.course)
@@ -114,9 +114,9 @@ if(count($allnotifications)>0){
 		$DB->insert_records('facebook_notifications', $allnotifications);
 }
 
-$countnotifications = count($allnotifications);*/
+$countnotifications = count($allnotifications);
 $time = time();
-/*
+
 //query that updates the status of the user last login
 $paramsupdate = array(
 			1,
@@ -129,19 +129,9 @@ $updatequery = "UPDATE {facebook_notifications}
 		SET status=?, timemodified=?
 		WHERE status = ? AND time >= ?";
 
-$DB->execute($updatequery, $paramsupdate);*/
-
-// Users linked with facebook
-
-$sqlgetusers = "SELECT *
-		FROM {facebook_user} AS fu
-		WHERE fu.status = ? ";
-
-$users = $DB->get_records_sql($sqlgetusers, array(1));
-
-$countusers = count($users);
+$DB->execute($updatequery, $paramsupdate);
 	
-echo $countusers." Updates found\n";
+echo $countnotifications." Notifications found\n";
 echo "ok\n";
 echo "Sending notifications ".date("F j, Y, G:i:s")."\n";
 
@@ -153,7 +143,7 @@ $config = array(
 		'secret' => $SecretID,
 		'grant_type' => 'client_credentials' );
 $facebook = new Facebook($config, true);
-/*
+
 $counttosend = 0;
 $token = $CFG->fbkTkn;
 $courseidarray = array();
@@ -196,40 +186,9 @@ foreach($arrayfacebookid as $userfacebookid){
 	}
 }
 
-*/
-
-$countusersupdate = 0;
-
-foreach($users as $user){
-	$userprofile = $facebook->api ( '' . $user->facebookid . '', 'GET' );
-
-	$newinfo = new stdClass();
-	$newinfo->id = $user->id;
-
-	$newinfo->link = $userprofile['link'];
-	$newinfo->firstname = $userprofile['first_name'];
-	if (isset ( $userprofile ['middle_name'] )) {
-		$newinfo->middlename = $userprofile['middle_name'];
-	}else{
-		$newinfo->middlename = "";
-	}
-	$newinfo->lastname = $userprofile['last_name'];
-
-	$status = "NO";
-	if($DB->update_record("facebook_user", $newinfo )){
-		$countusersupdate++;
-		$status = "SI";
-		echo $countusersupdate." Nombre ".$newinfo->firstname." ".$newinfo->middlename." ".$newinfo->lastname.
-			"Facebook id ".$user->facebookid." ok\n";
-	}
-
-
-
-}
-
 
 echo "ok\n";
-echo $countusersupdate." Update hechos sent.\n";
+echo $counttosend." notificantions sent.\n";
 echo "Ending at ".date("F j, Y, G:i:s");
 $timenow=time();
 $execute=$time - $timenow;

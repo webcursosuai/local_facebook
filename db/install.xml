@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/facebook/db" VERSION="20151125" COMMENT="XMLDB file for Moodle local/facebook"
+<XMLDB PATH="local/facebook/db" VERSION="20151127" COMMENT="XMLDB file for Moodle local/facebook"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -17,6 +17,7 @@
         <FIELD NAME="firstname" TYPE="char" LENGTH="200" NOTNULL="false" DEFAULT="NULL" SEQUENCE="false"/>
         <FIELD NAME="middlename" TYPE="char" LENGTH="200" NOTNULL="false" DEFAULT="NULL" SEQUENCE="false"/>
         <FIELD NAME="lastname" TYPE="char" LENGTH="200" NOTNULL="false" DEFAULT="NULL" SEQUENCE="false"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="false" DEFAULT="NULL" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

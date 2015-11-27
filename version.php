@@ -28,4 +28,4 @@
 defined('MOODLE_INTERNAL') || die();
 $plugin->pluginname = "local_facebook";
 $plugin->component = 'local_facebook';
-$plugin->version   = 2015102504;
+$plugin->version   = 2015102701;
