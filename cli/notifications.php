@@ -25,7 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-//define('CLI_SCRIPT', true);
+define('CLI_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir.'/clilib.php');      // cli only functions
@@ -36,7 +36,7 @@ require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
 require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
 include "../app/facebook-php-sdk-master/src/facebook.php";
 // now get cli options
-/*list($options, $unrecognized) = cli_get_params(array('help'=>false),
+list($options, $unrecognized) = cli_get_params(array('help'=>false),
                                                array('h'=>'help'));
 
 if ($unrecognized) {
@@ -63,7 +63,7 @@ cli_heading('Facebook notifications'); // TODO: localize
 
 echo "\nSearching for new notifications\n";
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
-*/
+
 // define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
 define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
