@@ -95,4 +95,4 @@ echo "\nExecute time ".$execute." sec";
 echo "\n";
 
 exit(0); // 0 means success
-echo $OUTPUT->footer ();
+
