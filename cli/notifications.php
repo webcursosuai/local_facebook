@@ -69,13 +69,11 @@ define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notifi
 define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
 
 // sql that brings the latest time modified from facebook_notifications
-$maxtimenotificationssql = "SELECT max(timemodified) AS maxtime
-		            FROM {facebook_notifications}
-			    WHERE status = ?";
+$maxtimenotificationssql = "SELECT max(timemodified) AS maxtime	
+		FROM {facebook_notifications}
+		WHERE status = ?";
 
-$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(
-		1
-));
+$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(1));
 
 // if clause that makes the timemodified=0 if there are no records in the data base
 if($maxtimenotifications->maxtime == null){
@@ -83,6 +81,7 @@ if($maxtimenotifications->maxtime == null){
 }else{
 	$timemodified = $maxtimenotifications->maxtime;
 }
+
 // sql that gets all the courses with a resource to notify
 $paramsresources = array(
 		'resource',
@@ -90,6 +89,7 @@ $paramsresources = array(
 		1,
 		$timemodified
 );
+//TODO: agregar foros, revisar fecha que incluir mas notificaciones.
 $sqlresource = "SELECT r.course
 		FROM {course_modules} AS cm INNER JOIN {modules} AS m ON (cm.module = m.id)
     	INNER JOIN {resource} AS r ON (r.course = cm.course)
@@ -185,6 +185,8 @@ foreach($arrayfacebookid as $userfacebookid){
 		;
 	}
 }
+
+
 echo "ok\n";
 echo $counttosend." notificantions sent.\n";
 echo "Ending at ".date("F j, Y, G:i:s");
