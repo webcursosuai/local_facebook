@@ -53,3 +53,4 @@ $string['existlink'] = 'Here';
 $string['courses'] = 'My courses';
 $string['help'] = 'Help';
 $string['email'] = 'webcursos@uai.cl';
+$string["connecttitle"] = "linked to facebook";
