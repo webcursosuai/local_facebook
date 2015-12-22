@@ -34,8 +34,6 @@ include "config.php";
 use Facebook\FacebookResponse;
 use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequire;
-use Facebook\Facebook;
-use Facebook\Request;
 include "htmltoinclude/javascriptindex.html";
 
 
@@ -47,7 +45,7 @@ $config = array(
 		"app_secret" => $secretid,
 		"default_graph_version" => "v2.5"
 );
-$fb = new Facebook\Facebook($config);
+$fb = new Facebook($config);
 
 try {
 	$response = $fb->get('/me?fields=id,name');
