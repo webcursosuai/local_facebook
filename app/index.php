@@ -48,17 +48,32 @@ $config = array(
 );
 $fb = new Facebook\Facebook($config);
 
+$helper = $fb->getCanvasHelper();
+
 try {
-	$response = $fb->get('/me?fields=id,name');
-	$user = $response->getGraphUser();
-	echo 'Name: ' . $user['name'];
-	echo 'id: ' . $user['id'];
-	exit; //redirect, or do whatever you want
+  $accessToken = $helper->getAccessToken();
 } catch(Facebook\Exceptions\FacebookResponseException $e) {
-	//echo 'Graph returned an error: ' . $e->getMessage();
+  // When Graph returns an error
+  echo 'Graph returned an error: ' . $e->getMessage();
+  exit;
 } catch(Facebook\Exceptions\FacebookSDKException $e) {
-	//echo 'Facebook SDK returned an error: ' . $e->getMessage();
+  // When validation fails or other local issues
+  echo 'Facebook SDK returned an error: ' . $e->getMessage();
+  exit;
 }
+
+if (! isset($accessToken)) {
+  echo 'No OAuth data could be obtained from the signed request. User has not authorized your app yet.';
+  exit;
+}
+
+// Logged in
+echo '<h3>Signed Request</h3>';
+var_dump($helper->getSignedRequest());
+
+echo '<h3>Access Token</h3>';
+var_dump($accessToken->getValue());
+/*
 
 $helper = $fb->getRedirectLoginHelper();
 $permissions = ["email",
@@ -79,3 +94,4 @@ $loginUrl = $helper->getLoginUrl(($CFG->wwwroot."/local/facebook/app/appwebcurso
 
 echo "<br><center><a href='" . htmlspecialchars($loginUrl) . "'><img src='app/images/login.jpg'width='180' height='30'></a><center>";
 
+*/
