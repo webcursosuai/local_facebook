@@ -29,6 +29,7 @@
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->dirroot.'/local/facebook/locallib.php');
+require_once ($CFG->dirroot . "/local/facebook/app/Facebook/autoload.php");
 global $DB, $USER, $CFG;
 include "config.php";
 use Facebook\FacebookResponse;
@@ -40,16 +41,13 @@ include "htmltoinclude/javascriptindex.html";
 //gets all facebook information needed
 $appid = $CFG->fbkAppID;
 $secretid = $CFG->fbkScrID;
-//$config = array(
-	//	"app_id" => $appid,
-		//"app_secret" => $secretid,
-		//"default_graph_version" => "v2.5"
-//);
-$fb = new Facebook([
+$config = array(
 		"app_id" => $appid,
 		"app_secret" => $secretid,
 		"default_graph_version" => "v2.5"
-]);
+);
+$fb = new Facebook\Facebook($config);
+
 
 try {
 	$response = $fb->get('/me?fields=id,name');
