@@ -21,28 +21,106 @@
  * @package    local
  * @subpackage facebook
  * @copyright  2013 Francisco García Ralph (francisco.garcia.ralph@gmail.com)
- * 			   2015 Xiu-Fong Lin (xlin@alumnos.uai.cl)
- * 			   2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
- * 			   2015 Hans Jeria (hansjeria@gmail.com)
+ * @copyright  2015 Xiu-Fong Lin (xlin@alumnos.uai.cl)
+ * @copyright  2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
+ * @copyright  2015 Hans Jeria (hansjeria@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
-require_once ($CFG->dirroot.'/local/facebook/locallib.php');
+require_once($CFG->dirroot.'/local/facebook/locallib.php');
 global $DB, $USER, $CFG;
-include "facebook-php-sdk-master/src/facebook.php";
+include "config.php";
+use Facebook\FacebookResponse;
+use Facebook\FacebookRedirectLoginHelper;
+use Facebook\FacebookRequire;
+use Facebook\Facebook;
+use Facebook\Request;
 include "htmltoinclude/javascriptindex.html";
+
 
 //gets all facebook information needed
 $AppID= $CFG->fbkAppID;
 $SecretID= $CFG->fbkScrID;
 $config = array(
-		'appId' => $AppID,
-		'secret' => $SecretID,
-		'grant_type' => 'client_credentials'
+		'app_id' => $AppID,
+		'app_secret' => $SecretID,
+		"default_graph_version" => "v2.5"
 );
 $facebook = new Facebook($config);
-$facebook_id= $facebook->getUser();
+
+echo $facebook->getDefaultAccessToken();
+
+$helper = $facebook->getCanvasHelper();
+
+try {
+	$accessToken = $helper->getAccessToken();
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	// There was an error communicating with Graph
+	// Or there was a problem validating the signed request
+	echo $e->getMessage();
+	exit;
+}
+echo "***".$accessToken;
+if ($accessToken) {
+	// Logged in.
+	$_SESSION['facebook_access_token'] = (string) $accessToken;
+	try {
+		// Returns a `Facebook\FacebookResponse` object
+		$response = $facebook->get('/me?fields=id,name',$accessToken);
+	} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		echo 'Graph returned an error: ' . $e->getMessage();
+		exit;
+	} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		echo 'Facebook SDK returned an error: ' . $e->getMessage();
+		exit;
+	}
+	
+	$user = $response->getGraphUser();
+	var_dump($user);
+}
+
+
+/*
+$helper = $facebook->getCanvasHelper();
+try {
+	$accessToken = $helper->getAccessToken();
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	// There was an error communicating with Graph
+	// Or there was a problem validating the signed request
+	echo $e->getMessage();
+	exit;
+}
+
+$cilent = $facebook->getOAuth2Client();
+
+try {
+	// Returns a long-lived access token
+	$accessToken = $cilent->getLongLivedAccessToken($accessToken);
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	// There was an error communicating with Graph
+	echo $e->getMessage();
+	exit;
+}
+
+if ($accessToken) {
+	echo 'Successfully logged in!';
+}
+try {
+	// Returns a `Facebook\FacebookResponse` object
+	$response = $facebook->get('/me?fields=id,name',$accessToken);
+} catch(Facebook\Exceptions\FacebookResponseException $e) {
+	echo 'Graph returned an error: ' . $e->getMessage();
+	exit;
+} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	echo 'Facebook SDK returned an error: ' . $e->getMessage();
+	exit;
+}
+
+$user = $response->getGraphUser();
+
+echo 'Name: ' . $user['name'];
+*/
 
 $app_name= $CFG->fbkAppNAME;
 $app_email= $CFG->fbkemail;
