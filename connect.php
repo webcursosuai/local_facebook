@@ -35,7 +35,8 @@ use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequire;
 global $DB, $USER, $CFG; 
 
-$connect = optional_param("code", null, PARAM_RAW);
+//$connect = optional_param("code", null, PARAM_RAW);
+$connect = $_GET["code"];
 $disconnect = optional_param ("disconnect", null, PARAM_TEXT );
 
 require_login ();
@@ -157,7 +158,7 @@ if(isset($userinfo->status)){
 				if(isset($accessToken)){
 
 					// Logged in!
-					$USER->facebook_access_token = $accessToken;
+					
 					$user_data = $facebook->get ("/me?fields=link,first_name,middle_name,last_name",$accessToken);
 						
 					$user_profile = $user_data->getGraphUser();
