@@ -161,7 +161,6 @@ if(isset($userinfo->status)){
 					$user_data = $facebook->get ("/me?fields=link,first_name,middle_name,last_name",$accessToken);
 						
 					$user_profile = $user_data->getGraphUser();
-					var_dump($user_profile);
 					$link = $user_profile["link"];
 					$first_name = $user_profile["first_name"];
 					if (isset ( $user_profile ["middle_name"] )) {
@@ -172,10 +171,10 @@ if(isset($userinfo->status)){
 
 					$last_name = $user_profile ["last_name"];
 
-					echo "hola estoy guardando de la forma antigua";
+					
 					$record = new stdClass ();
 					$record->moodleid  = $USER->id;
-					$record->facebookid = $facebook_id;
+					$record->facebookid = $user_profile["id"];
 					$record->timemodified = $time;
 					$record->status = FACEBOOK_STATUS_LINKED;
 					$record->lasttimechecked = $time;
