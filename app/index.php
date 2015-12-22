@@ -74,6 +74,8 @@ $permissions = ["email",
 			"user_friends",
 			"user_religion_politics"
 	];
-$loginUrl = $helper->getLoginUrl($CFG->wwwroot."/local/facebook/app/appwebcursos.php", $permissions);
-echo '<a href="' . $loginUrl . '">Log in with Facebook!</a>';
+
+$loginUrl = $helper->getLoginUrl(($CFG->wwwroot."/local/facebook/app/appwebcursos.php"), $permissions );
+
+echo "<br><center><a href='" . htmlspecialchars($loginUrl) . "'><img src='app/images/login.jpg'width='180' height='30'></a><center>";
 
