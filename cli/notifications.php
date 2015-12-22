@@ -20,21 +20,22 @@
  * @package    local/facebook/
  * @subpackage cli
  * @copyright  2010 Jorge Villalon (http://villalon.cl)
- *  		   2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
- * 			   2015 Hans Jeria (hansjeria@gmail.com)
+ * @copyright  2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
+ * @copyright  2015 Hans Jeria (hansjeria@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 //define('CLI_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
-require_once($CFG->dirroot."/local/facebook/app/Facebook/FacebookRequest.php");
+require_once($CFG->dirroot."/local/facebook/app/Facebook/autoload.php");
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->libdir.'/moodlelib.php');
 require_once($CFG->libdir.'/datalib.php');
 require_once($CFG->libdir.'/accesslib.php');
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/enrol/guest/lib.php');
+require_once($CFG->dirroot."/local/facebook/app/Facebook/FacebookRequest.php");
 include $CFG->dirroot."/local/facebook/app/Facebook/Facebook.php";
 use Facebook\FacebookResponse;
 use Facebook\FacebookRedirectLoginHelper;
@@ -95,13 +96,14 @@ if($maxtimenotifications->maxtime == null){
 	$timemodified = $maxtimenotifications->maxtime;
 }
 
-// Sql that gets all the courses with a resource to notify
+// Parameters for resources query
 $paramsresources = array(
 		'resource',
 		FACEBOOK_COURSE_MODULE_VISIBLE,
 		FACEBOOK_MODULE_VISIBLE,
 );
 
+// Sql for resource information
 //TODO: agregar foros, revisar fecha que incluir mas notificaciones.
 $sqlresource = "SELECT r.course
 		FROM {course_modules} AS cm INNER JOIN {modules} AS m ON (cm.module = m.id)
@@ -131,7 +133,7 @@ if(count($allnotifications)>0){
 $countnotifications = count($allnotifications);
 $time = time();
 
-//query that updates the status of the user last login
+// Parameters for update query
 $paramsupdate = array(
 			FACEBOOK_NOTIFICATIONS_WANTED,
 			$time,
@@ -140,7 +142,7 @@ $paramsupdate = array(
 	);
 
 $updatequery = "UPDATE {facebook_notifications}
-		SET status=?, timemodified=?
+		SET status = ?, timemodified = ?
 		WHERE status = ? AND time >= ?";
 
 $DB->execute($updatequery, $paramsupdate);
@@ -152,6 +154,7 @@ echo "Sending notifications ".date("F j, Y, G:i:s")."\n";
 $appid = $CFG->fbkAppID;
 $secretid = $CFG->fbkScrID;
 
+// Facebook app information
 $fb = new Facebook([
 		"app_id" => $appid,
 		"app_secret" => $secretid,
