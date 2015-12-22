@@ -35,7 +35,7 @@ use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequire;
 global $DB, $USER, $CFG; 
 
-$connect = optional_param("code", null, PARAM_TEXT );
+$connect = optional_param("code", null, PARAM_RAW);
 $disconnect = optional_param ("disconnect", null, PARAM_TEXT );
 
 require_login ();
