@@ -43,11 +43,11 @@ include "htmltoinclude/javascriptindex.html";
 $AppID= $CFG->fbkAppID;
 $SecretID= $CFG->fbkScrID;
 
-$fb = new Facebook\Facebook([
+$fb = new Facebook\Facebook(array(
 		'app_id' => $AppID,
 		'app_secret' => $SecretID,
 		'default_graph_version' => 'v2.5',
-]);
+));
 
 try {
 	$response = $fb->get('/me?fields=id,name');
