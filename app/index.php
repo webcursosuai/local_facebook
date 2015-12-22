@@ -73,7 +73,7 @@ var_dump($helper->getSignedRequest());
 
 $facebookdata = $helper->getSignedRequest();
 
-$user_data = $facebook->get ("/me?fields=id",$accessToken);
+$user_data = $fb->get("/me?fields=id",$accessToken);
 $user_profile = $user_data->getGraphUser();
 $facebook_id = $user_profile["id"];
 
