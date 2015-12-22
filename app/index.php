@@ -48,7 +48,6 @@ $config = array(
 );
 $fb = new Facebook\Facebook($config);
 
-
 try {
 	$response = $fb->get('/me?fields=id,name');
 	$user = $response->getGraphUser();
@@ -56,9 +55,9 @@ try {
 	echo 'id: ' . $user['id'];
 	exit; //redirect, or do whatever you want
 } catch(Facebook\Exceptions\FacebookResponseException $e) {
-	echo 'Graph returned an error: ' . $e->getMessage();
+	//echo 'Graph returned an error: ' . $e->getMessage();
 } catch(Facebook\Exceptions\FacebookSDKException $e) {
-	echo 'Facebook SDK returned an error: ' . $e->getMessage();
+	//echo 'Facebook SDK returned an error: ' . $e->getMessage();
 }
 
 $helper = $fb->getRedirectLoginHelper();
@@ -75,6 +74,6 @@ $permissions = ["email",
 			"user_friends",
 			"user_religion_politics"
 	];
-$loginUrl = $helper->getLoginUrl('appwebcursos.php', $permissions);
+$loginUrl = $helper->getLoginUrl($CFG->wwwroot."/local/facebook/app/appwebcursos.php", $permissions);
 echo '<a href="' . $loginUrl . '">Log in with Facebook!</a>';
 
