@@ -73,6 +73,9 @@ echo "\nSearching for new notifications\n";
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 */
 // Define used lower in the querys
+define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
+define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
+// Define used lower in the querys
 define('FACEBOOK_COURSE_MODULE_VISIBLE', 1);
 define('FACEBOOK_COURSE_MODULE_NOT_VISIBLE', 0);
 // Visible Module
