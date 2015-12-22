@@ -40,22 +40,27 @@ include "htmltoinclude/javascriptindex.html";
 //gets all facebook information needed
 $appid = $CFG->fbkAppID;
 $secretid = $CFG->fbkScrID;
-$config = array(
+//$config = array(
+	//	"app_id" => $appid,
+		//"app_secret" => $secretid,
+		//"default_graph_version" => "v2.5"
+//);
+$fb = new Facebook([
 		"app_id" => $appid,
 		"app_secret" => $secretid,
 		"default_graph_version" => "v2.5"
-);
-$fb = new Facebook($config);
+]);
 
 try {
 	$response = $fb->get('/me?fields=id,name');
 	$user = $response->getGraphUser();
 	echo 'Name: ' . $user['name'];
+	echo 'id: ' . $user['id'];
 	exit; //redirect, or do whatever you want
 } catch(Facebook\Exceptions\FacebookResponseException $e) {
-	//echo 'Graph returned an error: ' . $e->getMessage();
+	echo 'Graph returned an error: ' . $e->getMessage();
 } catch(Facebook\Exceptions\FacebookSDKException $e) {
-	//echo 'Facebook SDK returned an error: ' . $e->getMessage();
+	echo 'Facebook SDK returned an error: ' . $e->getMessage();
 }
 
 $helper = $fb->getRedirectLoginHelper();
