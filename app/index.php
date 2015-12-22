@@ -40,14 +40,14 @@ include "htmltoinclude/javascriptindex.html";
 
 
 //gets all facebook information needed
-$AppID= $CFG->fbkAppID;
-$SecretID= $CFG->fbkScrID;
-
-$fb = new Facebook\Facebook(array(
-		'app_id' => $AppID,
-		'app_secret' => $SecretID,
-		'default_graph_version' => 'v2.5',
-));
+$appid = $CFG->fbkAppID;
+$secretid = $CFG->fbkScrID;
+$config = array(
+		"app_id" => $appid,
+		"app_secret" => $secretid,
+		"default_graph_version" => "v2.5"
+);
+$fb = new Facebook\Facebook($config);
 
 try {
 	$response = $fb->get('/me?fields=id,name');
