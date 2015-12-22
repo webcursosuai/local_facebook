@@ -184,7 +184,8 @@ if(isset($userinfo->status)){
 					$record->lastname = $last_name;
 					//$record->email = $link;
 
-					$DB->update_record("facebook_user", $record );
+					$DB->insert_record("facebook_user", $record );
+					
 					echo "<script>location.reload();</script>";
 					// Now you can redirect to another page and use the
 					// access token from $_SESSION['facebook_access_token']
