@@ -29,14 +29,13 @@
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->dirroot.'/local/facebook/locallib.php');
-require_once ($CFG->dirroot . "/local/facebook/app/Facebook/autoload.php");
+require_once ($CFG->dirroot."/local/facebook/app/Facebook/autoload.php");
 global $DB, $USER, $CFG;
 include "config.php";
 use Facebook\FacebookResponse;
 use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequire;
 include "htmltoinclude/javascriptindex.html";
-
 
 //gets all facebook information needed
 $appid = $CFG->fbkAppID;
@@ -67,40 +66,11 @@ if (! isset($accessToken)) {
   exit;
 }
 
-// Logged in
-echo '<h3>Signed Request</h3>';
-var_dump($helper->getSignedRequest());
-
 $facebookdata = $helper->getSignedRequest();
 
 $user_data = $fb->get("/me?fields=id",$accessToken);
 $user_profile = $user_data->getGraphUser();
 $facebook_id = $user_profile["id"];
-
-//echo '<h3>Access Token</h3>';
-//var_dump($accessToken->getValue());
-/*
-
-$helper = $fb->getRedirectLoginHelper();
-$permissions = ["email",
-			"publish_actions",
-			"user_birthday",
-			"user_tagged_places",
-			"user_work_history",
-			"user_about_me",
-			"user_hometown",
-			"user_actions.books",
-			"user_education_history",
-			"user_likes",
-			"user_friends",
-			"user_religion_politics"
-	];
-
-$loginUrl = $helper->getLoginUrl(($CFG->wwwroot."/local/facebook/app/appwebcursos.php"), $permissions );
-
-echo "<br><center><a href='" . htmlspecialchars($loginUrl) . "'><img src='app/images/login.jpg'width='180' height='30'></a><center>";
-
-*/
 
 $app_name= $CFG->fbkAppNAME;
 $app_email= $CFG->fbkemail;
@@ -146,20 +116,44 @@ if ($userfacebookinfo != false) {
 		$shortname = $courses->shortname;
 		$totals = 0;
 		// tests if the array has something in it
-		if (isset($totalresource[$courseid]))
+		if (isset($totalresource[$courseid])){
 			$totals += intval($totalresource[$courseid]);
+		}
 		// tests if the array has something in it
-		if (isset($totalurl[$courseid]))
+		if (isset($totalurl[$courseid])){
 			$totals += intval($totalurl[$courseid]);
+		}
 		// tests if the array has something in it
-		if (isset($totalpost[$courseid]))
+		if (isset($totalpost[$courseid])){
 			$totals += intval($totalpost[$courseid]);
+		}
 		echo '<a class="inline link_curso" href="#'.$courseid.'"><li class="curso"><p class="nombre"><img src="images/lista_curso.png">'.$fullname.'</p>';
 		//if there is something to notify, then show the number of new things
 		if ($totals>0){
 			echo '<span class="numero_notificaciones">'.$totals.'</span>';
 		}
-		include "htmltoinclude/tableheaderindex.html";
+		//include "htmltoinclude/tableheaderindex.html";
+		?>
+				</li>
+			</a>
+		<div class="popup_curso" id="<?php echo $courseid ?>">
+			<a href="#" class="close"></a>
+			<div class="contenido_popup">
+				<?php echo get_string('tabletittle', 'local_facebook').$fullname; ?><br>
+				<table class="tablesorter" border="0" width="100%"
+					style="font-size: 13px">
+					<thead>
+						<tr>
+							<th width="8%"></th>
+							<th width="52%"><?php echo get_string('rowtittle', 'local_facebook'); ?></th>
+							<th width="20%"><?php echo get_string('rowfrom', 'local_facebook'); ?></th>
+							<th width="20%"><?php echo get_string('rowdate', 'local_facebook'); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+		
+		
+		<?php 
 		//foreach that gives the corresponding image to the new and old items created(resource,post,forum), and its title, how upload it and its link
 		foreach($dataarray as $data){
 			if($data['course'] == $courseid){
