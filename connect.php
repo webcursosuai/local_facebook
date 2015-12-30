@@ -89,7 +89,7 @@ if(isset($userinfo->status)){
 		echo $OUTPUT->heading(get_string("succesfullconnect", "local_facebook"), 3)
 		."<a href='../../'>".get_string ( 'back', 'local_facebook' )."</a>";
 
-	}else if($userinfo->firstname == "NULL"){
+	}else if($userinfo->firstname == NULL){
 		
 		$sqlfilteruser = "SELECT fu.facebookid, u.firstname, u.lastname, fu.link, fu.middlename
 				FROM {facebook_user} AS fu JOIN {user} AS u ON (fu.moodleid = u.id)
