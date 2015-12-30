@@ -65,7 +65,7 @@ $userinfo = $DB->get_record ( 'facebook_user', array (
 		'moodleid' => $USER->id,
 		'status' => FACEBOOK_STATUS_LINKED
 ) );
-
+var_dump($userinfo);
 $time = time ();
 // Look if the user has accepted the permissions
 // if by looking the facebook_id is 0, that means the user hasn't accepted it.
@@ -89,7 +89,7 @@ if(isset($userinfo->status)){
 		echo $OUTPUT->heading(get_string("succesfullconnect", "local_facebook"), 3)
 		."<a href='../../'>".get_string ( 'back', 'local_facebook' )."</a>";
 
-	}else if($userinfo->firstname == NULL){
+	}else if($userinfo->firstname == "NULL"){
 		echo "estoy aca";
 		$sqlfilteruser = "SELECT fu.facebookid, u.firstname, u.lastname, fu.link, fu.middlename
 				FROM {facebook_user} AS fu JOIN {user} AS u ON (fu.moodleid = u.id)
