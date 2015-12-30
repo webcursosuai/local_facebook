@@ -217,6 +217,7 @@ if(isset($userinfo->status)){
 					//$record->email = $link;
 					
 					if($user_inactive = $DB->get_record("facebook_user", array("moodleid" => $USER->id,"status" => 0))){
+						$record->id =$user_inactive->id;
 						$DB->update_record("facebook_user", $record );
 					}else{
 						$DB->insert_record("facebook_user", $record );
