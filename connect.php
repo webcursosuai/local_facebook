@@ -35,8 +35,8 @@ use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookRequire;
 global $DB, $USER, $CFG; 
 
-//$connect = optional_param("code", null, PARAM_RAW);
-$connect = $_GET["code"];
+$connect = optional_param("code", null, PARAM_RAW);
+//$connect = $_GET["code"];
 $disconnect = optional_param ("disconnect", null, PARAM_TEXT );
 
 require_login ();
@@ -89,20 +89,51 @@ if(isset($userinfo->status)){
 		echo $OUTPUT->heading(get_string("succesfullconnect", "local_facebook"), 3)
 		."<a href='../../'>".get_string ( 'back', 'local_facebook' )."</a>";
 
-	}else{
-		$facebook_id = $userinfo->facebookid;
-		$status = $userinfo->status;
+	}else if($userinfo->firstname == NULL){
+		
+		$sqlfilteruser = "SELECT fu.facebookid, u.firstname, u.lastname, fu.link, fu.middlename
+				FROM {facebook_user} AS fu JOIN {user} AS u ON (fu.moodleid = u.id)
+				WHERE fu.moodleid = ?";
+		
+		$information = new stdClass();
+		
+		if( $datauser = $DB->get_records_sql($sqlfilteruser,array($USER->id)) ){
+			foreach($datauser as $data){
+				$information->facebookid = $data->facebookid;
+				$information->link = "https://www.facebook.com/app_scoped_user_id/".$data->facebookid."/";
+				$information->firstname = $data->firstname;
+				$information->middlename = "";
+				$information->lastname = $data->lastname;
+			}
+		}
+		
 		echo $OUTPUT->heading(get_string("connectheading", "local_facebook"));
 
 		$table = facebook_connect_table_generator (
-				$userinfo->facebookid,
-				$userinfo->link,
-				$userinfo->firstname,
-				$userinfo->middlename,
-				$userinfo->lastname,
+				$information->facebookid,
+				$information->link,
+				$information->firstname,
+				$information->middlename,
+				$information->lastname,
 				$appname
 		);
 
+		$button = new buttons ();
+		$button->display ();
+	} else{
+		$facebook_id = $userinfo->facebookid;
+		$status = $userinfo->status;
+		echo $OUTPUT->heading(get_string("connectheading", "local_facebook"));
+		//////////////////
+		$table = facebook_connect_table_generator (
+		$userinfo->facebookid,
+		$userinfo->link,
+		$userinfo->firstname,
+		$userinfo->middlename,
+		$userinfo->lastname,
+		$appname
+		);
+		
 		$button = new buttons ();
 		$button->display ();
 	}
@@ -224,8 +255,26 @@ if(isset($userinfo->status)){
 		echo $OUTPUT->heading(get_string("acountconnect", "local_facebook"));
 		echo $OUTPUT->heading(get_string("connectwith", "local_facebook"), 5);
 
-		$datauser = $DB->get_record("facebook_user",array("moodleid"=>$USER->id));
-
+		if($userinfo->firstname == NULL){
+			$sqlfilteruser = "SELECT fu.facebookid, u.firstname, u.lastname, fu.link, fu.middlename
+				FROM {facebook_user} AS fu JOIN {user} AS u ON (fu.moodleid = u.id)
+				WHERE fu.moodleid = ?";
+			
+			$datauser = new stdClass();
+			
+			if( $querydata = $DB->get_records_sql($sqlfilteruser,array($USER->id)) ){
+				foreach($querydata as $data){
+					$datauser->facebookid = $data->facebookid;
+					$datauser->link = "https://www.facebook.com/app_scoped_user_id/".$data->facebookid."/";
+					$datauser->firstname = $data->firstname;
+					$datauser->middlename = "";
+					$datauser->lastname = $data->lastname;
+				}
+			}
+		}else {
+			$datauser = $DB->get_record("facebook_user",array("moodleid"=>$USER->id));
+		}
+		
 		$table = facebook_connect_table_generator(
 				$datauser->facebookid,
 				$datauser->link,
