@@ -164,7 +164,7 @@ if(isset($userinfo->status)){
 	if($connect != NULL){
 
 		// If the user wants to link an account that was already linked, but was unlinked that means with status 0
-
+		/*
 		$user_inactive = $DB->get_record("facebook_user", array(
 				"moodleid" => $USER->id,
 				"status" => 0
@@ -179,7 +179,7 @@ if(isset($userinfo->status)){
 				
 			echo "<script>location.reload();</script>";
 		}  // If the user wants to link a account that was never linked before.
-		else {
+		else {*/
 			// Facebook code to search the user information.
 			// We have a user ID, so probably a logged in user.
 			// If not, we'll get an exception, which we handle below.
@@ -215,8 +215,13 @@ if(isset($userinfo->status)){
 					$record->middlename = $middle_name;
 					$record->lastname = $last_name;
 					//$record->email = $link;
+					
+					if($user_inactive = $DB->get_record("facebook_user", array("moodleid" => $USER->id,"status" => 0))){
+						$DB->update_record("facebook_user", $record );
+					}else{
+						$DB->insert_record("facebook_user", $record );
+					}
 
-					$DB->insert_record("facebook_user", $record );
 					
 					echo "<script>location.reload();</script>";
 					// Now you can redirect to another page and use the
@@ -249,7 +254,7 @@ if(isset($userinfo->status)){
 				echo "Please <a href='" . $login_Url . "'>Log in with Facebook..</a>";
 			}
 
-		}
+		//}
 	} else {
 
 		echo $OUTPUT->heading(get_string("acountconnect", "local_facebook"));
