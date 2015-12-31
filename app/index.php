@@ -184,6 +184,6 @@ if ($userfacebookinfo != false) {
 
 } else{
 	echo '<div class="cuerpo"><h1>'.get_string('existtittle', 'local_facebook').'</h1>
-		     <p>'.get_string('existtext', 'local_facebook').'<a href="'.$connecturl.'" >'.get_string('existlink', 'local_facebook').'</a></p></div>';
+		     <p>'.get_string('existtext', 'local_facebook').'<a  target="_blank" href="'.$connecturl.'" >'.get_string('existlink', 'local_facebook').'</a></p></div>';
 	include 'htmltoinclude/spacer.html';
 }
