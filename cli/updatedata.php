@@ -33,6 +33,15 @@ require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
 require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
 include "../app/facebook-php-sdk-master/src/facebook.php";
 
+require_login();
+if (isguestuser()) {
+	die();
+}
+
+if(!is_siteadmin($USER)){
+	die();
+}
+
 $time = time();
 
 $sqlgetusers = "SELECT *

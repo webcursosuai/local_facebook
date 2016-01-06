@@ -20,21 +20,29 @@
  * @package    local/facebook/
  * @subpackage cli
  * @copyright  2010 Jorge Villalon (http://villalon.cl)
- *  		   2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
- * 			   2015 Hans Jeria (hansjeria@gmail.com)
+ * @copyright  2015 Mihail Pozarski (mipozarski@alumnos.uai.cl)
+ * @copyright  2015 Hans Jeria (hansjeria@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 define('CLI_SCRIPT', true);
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
-require_once($CFG->libdir.'/clilib.php');      // cli only functions
-require_once($CFG->libdir.'/moodlelib.php');      // moodle lib functions
-require_once($CFG->libdir.'/datalib.php');      // data lib functions
-require_once($CFG->libdir.'/accesslib.php');      // access lib functions
-require_once($CFG->dirroot.'/course/lib.php');      // course lib functions
-require_once($CFG->dirroot.'/enrol/guest/lib.php');      // guest enrol lib functions
-include "../app/facebook-php-sdk-master/src/facebook.php";
+require_once($CFG->dirroot."/local/facebook/app/Facebook/autoload.php");
+require_once($CFG->libdir.'/clilib.php');
+require_once($CFG->libdir.'/moodlelib.php');
+require_once($CFG->libdir.'/datalib.php');
+require_once($CFG->libdir.'/accesslib.php');
+require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->dirroot.'/enrol/guest/lib.php');
+require_once($CFG->dirroot."/local/facebook/app/Facebook/FacebookRequest.php");
+include $CFG->dirroot."/local/facebook/app/Facebook/Facebook.php";
+use Facebook\FacebookResponse;
+use Facebook\FacebookRedirectLoginHelper;
+use Facebook\FacebookRequire;
+use Facebook\Facebook;
+use Facebook\Request;
+
 // now get cli options
 list($options, $unrecognized) = cli_get_params(array('help'=>false),
                                                array('h'=>'help'));
@@ -64,37 +72,48 @@ cli_heading('Facebook notifications'); // TODO: localize
 echo "\nSearching for new notifications\n";
 echo "\nStarting at ".date("F j, Y, G:i:s")."\n";
 
-// define used lower in the querys
+// Define used lower in the querys
 define('FACEBOOK_NOTIFICATION_LOGGEDOFF','message_provider_local_facebook_notification_loggedoff');
 define('FACEBOOK_NOTIFICATION_LOGGEDIN','message_provider_local_facebook_notification_loggedin');
+// Define used lower in the querys
+define('FACEBOOK_COURSE_MODULE_VISIBLE', 1);
+define('FACEBOOK_COURSE_MODULE_NOT_VISIBLE', 0);
+// Visible Module
+define('FACEBOOK_MODULE_VISIBLE', 1);
+define('FACEBOOK_MODULE_NOT_VISIBLE', 0);
+// Facebook Notifications
+define('FACEBOOK_NOTIFICATIONS_WANTED', 1);
+define('FACEBOOK_NOTIFICATIONS_UNWANTED', 0);
 
-// sql that brings the latest time modified from facebook_notifications
+// Sql that brings the latest time modified from facebook_notifications
 $maxtimenotificationssql = "SELECT max(timemodified) AS maxtime	
 		FROM {facebook_notifications}
 		WHERE status = ?";
 
-$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(1));
+$maxtimenotifications = $DB->get_record_sql($maxtimenotificationssql, array(FACEBOOK_NOTIFICATIONS_WANTED));
 
-// if clause that makes the timemodified=0 if there are no records in the data base
+// If clause that makes the timemodified=0 if there are no records in the data base
 if($maxtimenotifications->maxtime == null){
 	$timemodified = 0;
 }else{
 	$timemodified = $maxtimenotifications->maxtime;
 }
 
-// sql that gets all the courses with a resource to notify
+// Parameters for resources query
 $paramsresources = array(
 		'resource',
-		1,
-		1,
-		$timemodified
+		FACEBOOK_COURSE_MODULE_VISIBLE,
+		FACEBOOK_MODULE_VISIBLE,
 );
+
+// Sql for resource information
 //TODO: agregar foros, revisar fecha que incluir mas notificaciones.
 $sqlresource = "SELECT r.course
 		FROM {course_modules} AS cm INNER JOIN {modules} AS m ON (cm.module = m.id)
     	INNER JOIN {resource} AS r ON (r.course = cm.course)
-		WHERE m.name IN (?) AND cm.visible = ? AND m.visible = ? AND r.timemodified >= ?
+		WHERE m.name IN (?) AND cm.visible = ? AND m.visible = ? 
     	GROUP BY r.course";
+
 $dataresource = $DB->get_records_sql($sqlresource, $paramsresources);
 
 $allnotifications = array();
@@ -117,16 +136,16 @@ if(count($allnotifications)>0){
 $countnotifications = count($allnotifications);
 $time = time();
 
-//query that updates the status of the user last login
+// Parameters for update query
 $paramsupdate = array(
-			1,
+			FACEBOOK_NOTIFICATIONS_WANTED,
 			$time,
-			0,
+			FACEBOOK_NOTIFICATIONS_UNWANTED,
 			$timemodified
 	);
 
 $updatequery = "UPDATE {facebook_notifications}
-		SET status=?, timemodified=?
+		SET status = ?, timemodified = ?
 		WHERE status = ? AND time >= ?";
 
 $DB->execute($updatequery, $paramsupdate);
@@ -135,23 +154,36 @@ echo $countnotifications." Notifications found\n";
 echo "ok\n";
 echo "Sending notifications ".date("F j, Y, G:i:s")."\n";
 
+$appid = $CFG->fbkAppID;
+$secretid = $CFG->fbkScrID;
 
-$AppID= $CFG->fbkAppID;
-$SecretID= $CFG->fbkScrID;
-$config = array(
-		'appId' => $AppID,
-		'secret' => $SecretID,
-		'grant_type' => 'client_credentials' );
-$facebook = new Facebook($config, true);
+// Facebook app information
+$fb = new Facebook([
+		"app_id" => $appid,
+		"app_secret" => $secretid,
+		"default_graph_version" => "v2.5"
+]);
 
 $counttosend = 0;
-$token = $CFG->fbkTkn;
 $courseidarray = array();
+
+// Foreach that generates a array with all the user courses
 foreach($dataresource as $resources){
 	$courseidarray[] = $resources->course;
 }
+// User parameters for query
+$userparams = array(
+		FACEBOOK_NOTIFICATION_LOGGEDOFF,
+		FACEBOOK_NOTIFICATION_LOGGEDIN,
+		FACEBOOK_NOTIFICATIONS_WANTED
+);
+
+// List the result of get_in_or_equal
 list($sqlin, $courseparam) = $DB->get_in_or_equal($courseidarray);
-// query that brings all the user notifications from each course
+
+$paramsmerge = array_merge($courseparam,$userparams);
+
+// Sql that brings the facebook user id
 $sqlusers = "SELECT  facebookuser.facebookid AS facebookid
 	     FROM {user_enrolments} AS enrolments
 	     INNER JOIN  {enrol} AS enrol ON (enrolments.enrolid=enrol.id)
@@ -159,30 +191,33 @@ $sqlusers = "SELECT  facebookuser.facebookid AS facebookid
 	     INNER JOIN {facebook_user} AS facebookuser ON (facebookuser.moodleid=enrolments.userid)
 	     WHERE enrol.courseid $sqlin
 	     AND preferences.name IN (?,?)
-	     AND preferences.value like  '%facebook%' AND facebookuser.status=?
+	     AND preferences.value like  '%facebook%' AND facebookuser.status = ?
 	     GROUP BY facebookuser.facebookid";
 
-$userparams = array(
-		FACEBOOK_NOTIFICATION_LOGGEDOFF,
-		FACEBOOK_NOTIFICATION_LOGGEDIN,
-		1
-);
-$params = array_merge($courseparam,$userparams);
 
-$arrayfacebookid = $DB->get_records_sql($sqlusers,$params);
+// Gets the information of the above query
+$arrayfacebookid = $DB->get_records_sql($sqlusers,$paramsmerge);
 
-//for each that notify all the facebook users with new staff to see
+//Foreach that notify all the facebook users with new staff to see
 foreach($arrayfacebookid as $userfacebookid){
 	
 	if($userfacebookid->facebookid != null){
-		$post = $facebook->api('/'.$userfacebookid->facebookid.'/notifications/', 'POST', array(
-				'access_token'=>$AppID.'|'.$SecretID,
-				'href'=>'', // this does link to the app's root, don't think this actually works, seems to link to the app's canvas page
-				'template'=>'Tienes nuevas notificaciones en Webcursos.' 
-		));
-		$counttosend++;
-		echo $counttosend." ".$userfacebookid->facebookid." ok\n";
-		;
+		$data = array(
+				"link" => "",
+				"message" => "",
+				"template" => "Tienes nuevas notificaciones en Webcursos."
+		);
+		
+		$fb->setDefaultAccessToken($appid.'|'.$secretid);
+		$response = $fb->post('/'.$userfacebookid->facebookid.'/notifications', $data);
+		$return = $response->getDecodedBody();
+		if($return['success'] == TRUE){		
+			// Echo that tells to who notifications were senta, ordered by id
+			echo $counttosend." ".$userfacebookid->facebookid." ok\n";
+			$counttosend++;
+		}else{
+			echo $userfacebookid->facebookid." fail\n";
+		}
 	}
 }
 
@@ -190,8 +225,8 @@ foreach($arrayfacebookid as $userfacebookid){
 echo "ok\n";
 echo $counttosend." notificantions sent.\n";
 echo "Ending at ".date("F j, Y, G:i:s");
-$timenow=time();
-$execute=$time - $timenow;
+$timenow = time();
+$execute = $time - $timenow;
 echo "\nExecute time ".$execute." sec";
 echo "\n";
 

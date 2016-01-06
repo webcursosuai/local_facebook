@@ -23,11 +23,15 @@
  * @copyright  2013 Francisco García Ralph (francisco.garcia.ralph@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-include "facebook-php-sdk-master/src/facebook.php";
-$AppID= $CFG->fbkAppID;
-$SecretID= $CFG->fbkScrID;
+
+require_once ($CFG->dirroot . "/local/facebook/app/Facebook/autoload.php");
+define('FACEBOOK_STATUS_LINKED', 1);
+
+$appid = $CFG->fbkAppID;
+$secretid = $CFG->fbkScrID;
 $config = array(
-		'appId' => $AppID,
-		'secret' => $SecretID,
-		'grant_type' => 'client_credentials' );
+		"app_id" => $appid,
+		"app_secret" => $secretid,
+		"default_graph_version" => "v2.5" 
+);
 
