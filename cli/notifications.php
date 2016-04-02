@@ -184,11 +184,12 @@ list($sqlin, $courseparam) = $DB->get_in_or_equal($courseidarray);
 $paramsmerge = array_merge($courseparam,$userparams);
 
 // Sql that brings the facebook user id
-$sqlusers = "SELECT  facebookuser.facebookid AS facebookid
+$sqlusers = "SELECT  facebookuser.facebookid AS facebookid, CONCAT(u.firstname, ' ',u.lastname) as username, u.email
 	     FROM {user_enrolments} AS enrolments
 	     INNER JOIN  {enrol} AS enrol ON (enrolments.enrolid=enrol.id)
 	     INNER JOIN {user_preferences} AS preferences ON (preferences.userid=enrolments.userid)
 	     INNER JOIN {facebook_user} AS facebookuser ON (facebookuser.moodleid=enrolments.userid)
+	     INNER {user} AS u ON (u.id = facebookuser.moodleid)
 	     WHERE enrol.courseid $sqlin
 	     AND preferences.name IN (?,?)
 	     AND preferences.value like  '%facebook%' AND facebookuser.status = ?
@@ -209,15 +210,22 @@ foreach($arrayfacebookid as $userfacebookid){
 		);
 		
 		$fb->setDefaultAccessToken($appid.'|'.$secretid);
-		$response = $fb->post('/'.$userfacebookid->facebookid.'/notifications', $data);
-		$return = $response->getDecodedBody();
-		if($return['success'] == TRUE){		
-			// Echo that tells to who notifications were senta, ordered by id
-			echo $counttosend." ".$userfacebookid->facebookid." ok\n";
+		
+		try{
+			$response = $fb->post('/'.$userfacebookid->facebookid.'/notifications', $data);
+			$return = $response->getDecodedBody();
+			if($return['success'] == TRUE){
+				// Echo that tells to who notifications were senta, ordered by id
+				echo $counttosend." ".$userfacebookid->facebookid." - ".$userfacebookid->username." - ".$userfacebookid->email." ok\n";
+				$counttosend++;
+			}else{
+				echo $counttosend." ".$userfacebookid->facebookid." - ".$userfacebookid->username." - ".$userfacebookid->email." fail\n";
+			}
 			$counttosend++;
-		}else{
-			echo $userfacebookid->facebookid." fail\n";
+		}catch(Exception $e){
+			echo "Exception Facebook ".$userfacebookid->facebookid." - ".$userfacebookid->username." - ".$userfacebookid->email."fail\n";
 		}
+		
 	}
 }
 
