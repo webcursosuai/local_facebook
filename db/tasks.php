@@ -13,25 +13,22 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-
 /**
- *
- *
- * @package    local
- * @subpackage facebook
- * @copyright  2013 Francisco García Ralph (francisco.garcia.ralph@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-require_once ($CFG->dirroot . "/local/facebook/app/Facebook/autoload.php");
-define('FACEBOOK_STATUS_LINKED', 1);
-
-$appid = $CFG->fbkAppID;
-$secretid = $CFG->fbkScrID;
-$config = array(
-		"app_id" => $appid,
-		"app_secret" => $secretid,
-		"default_graph_version" => "v2.5" 
+*
+*
+* @package    local
+* @subpackage facebook
+* @copyright  2016 Hans Jeria <hansjeria@gmail.com>
+* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+*/
+$tasks = array(
+	array(
+			'classname' => 'local_facebook\task\facebook_notifications',
+			'blocking' => 0,
+			'minute' => 0,
+			'hour' => '2,8,14,20',
+			'day' => '*',
+			'dayofweek' => '*',
+			'month' => '*'
+	)
 );
-
